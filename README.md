@@ -4,7 +4,7 @@
 
 DraggableScaffold is a library that helps stack one composable on top of another so it can be dragged to reveal the content under it.
 
-***Current Compose Version: 1.0.0-beta08***
+***Current Compose Version: 1.0.2***
 
 ## Demo
 
