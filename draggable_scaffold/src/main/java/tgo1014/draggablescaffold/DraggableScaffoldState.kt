@@ -7,13 +7,32 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.dp
 
+/**
+ * Create and [remember] the [DraggableScaffoldState] taking into account default state and
+ * SnapOffset
+ *
+ * @param defaultExpandState initial state of the DraggableScaffold,
+ * @param snapOffset specifies the offset of when Snap happens when drag ends
+ *
+ */
+@Composable
+fun rememberDraggableScaffoldState(
+    defaultExpandState: ExpandState = ExpandState.Collapsed,
+    snapOffset: Float = 0.5f
+): DraggableScaffoldState {
+    return rememberSaveable(saver = Saver) {
+        DraggableScaffoldState(
+            defaultExpandState = defaultExpandState,
+            snapOffset = SnapOffset(snapOffset)
+        )
+    }
+}
+
 class DraggableScaffoldState(
     internal val defaultExpandState: ExpandState = ExpandState.Collapsed,
     internal val snapOffset: SnapOffset = SnapOffset(0.5f),
     offsetX: Float = 0f,
 ) {
-
-
     /**
      * represents the current dragging left offset between 0 and 1
      */
@@ -32,7 +51,6 @@ class DraggableScaffoldState(
             if (contentUnderRightWidth == 0f) return 0f
             return offsetX / ExpandState.ExpandedRight.offset()
         }
-
 
     /**
      * represents the current State of the Draggable scaffold based on current offset
@@ -63,12 +81,20 @@ class DraggableScaffoldState(
     internal var offsetX by mutableStateOf(offsetX)
 
 
+    /**
+     * Animates to the new [ExpandState] using the [AnimationSpec]
+     * @param newState - the new state to animate to
+     * @param spec - [AnimationSpec] that will be used for the animation
+     */
     suspend fun animateToState(newState: ExpandState, spec: AnimationSpec<Float> = tween(300)) {
         animate(offsetX, newState.offset(), animationSpec = spec) { currentValue, _ ->
             offsetX = currentValue
         }
     }
 
+    /**
+     * Sets new [ExpandState]
+     */
     fun setExpandState(state: ExpandState) {
         if (state != currentState) {
             offsetX = state.offset()
@@ -122,17 +148,4 @@ class DraggableScaffoldState(
         }
     }
 
-}
-
-@Composable
-fun rememberDraggableScaffoldState(
-    defaultExpandState: ExpandState = ExpandState.Collapsed,
-    snapOffset: Float = 0.5f
-): DraggableScaffoldState {
-    return rememberSaveable(saver = Saver) {
-        DraggableScaffoldState(
-            defaultExpandState = defaultExpandState,
-            snapOffset = SnapOffset(snapOffset)
-        )
-    }
 }

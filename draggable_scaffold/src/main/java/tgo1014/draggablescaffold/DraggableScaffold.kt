@@ -28,6 +28,7 @@ import kotlin.math.roundToInt
  * This component provide api for layering two [Composable]s where the top one can be dragged to
  * revel the bottom one
  *
+ * @param state the initial state of the DraggableScaffold, @see DraggableScaffoldState
  * @param background the background for the content behind
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
  * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
