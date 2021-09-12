@@ -157,7 +157,42 @@ fun Demos() {
                 }
             }
         )
+        OldExample()
     }
+}
+
+@Composable
+fun OldExample() {
+    // Animate background color by offset
+    var cardBackground by remember { mutableStateOf(Color.White) }
+    DraggableScaffold(
+        leftExpanded = true,
+        contentUnderRight = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
+        contentUnderLeft = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
+        onLeftOffsetChanged = {
+            if (it < 0) return@DraggableScaffold
+            cardBackground = Color(
+                ColorUtils.blendARGB(Color.White.toArgb(), Color.Magenta.toArgb(), it)
+            )
+        },
+        onRightOffsetChanged = {
+            if (it < 0) return@DraggableScaffold
+            cardBackground = Color(
+                ColorUtils.blendARGB(Color.White.toArgb(), Color.Cyan.toArgb(), it)
+            )
+        },
+        contentOnTop = {
+            Card(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth(),
+                backgroundColor = cardBackground,
+                elevation = 4.dp
+            ) {
+                Text(text = "Drag left or right to animate the background color", Modifier.padding(16.dp))
+            }
+        }
+    )
 }
 
 private fun offsetToElevation(offset: Float): Float {

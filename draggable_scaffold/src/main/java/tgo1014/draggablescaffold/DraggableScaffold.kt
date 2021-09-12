@@ -28,6 +28,56 @@ import kotlin.math.roundToInt
  * This component provide api for layering two [Composable]s where the top one can be dragged to
  * revel the bottom one
  *
+ * @param leftExpanded determines if [Composable] on the bottom left should be showing at the start
+ * @param rightExpanded determines if [Composable] on the bottom right should be showing at the start
+ * @param onLeftOffsetChanged trigger the current dragging left offset between 0 and 1
+ * @param onRightOffsetChanged trigger the current dragging right offset between 0 and 1
+ * @param snapOffset a value between 0 and 1 that determine from which point the front view snaps
+ *        to the start or the end
+ * @param background the background for the content behind
+ * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
+ * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
+ * @param contentOnTop the [Composable] that's going to be draw in from of the [contentUnderLeft] and [contentUnderRight]
+ */
+@Composable
+@Deprecated("Use DraggableScaffold with that accepts DraggableScaffoldState")
+fun DraggableScaffold(
+    leftExpanded: Boolean = false,
+    rightExpanded: Boolean = false,
+    onLeftOffsetChanged: ((Float) -> Unit)? = null,
+    onRightOffsetChanged: ((Float) -> Unit)? = null,
+    snapOffset: SnapOffset = SnapOffset(0.5f),
+    background: Color = MaterialTheme.colors.surface,
+    contentUnderLeft: @Composable () -> Unit = {},
+    contentUnderRight: @Composable () -> Unit = {},
+    contentOnTop: @Composable () -> Unit,
+) {
+    val state = rememberDraggableScaffoldState(
+        when {
+            leftExpanded -> ExpandState.ExpandedLeft
+            rightExpanded -> ExpandState.ExpandedRight
+            else -> ExpandState.Collapsed
+        },
+        snapOffset = snapOffset.offset
+    )
+
+    onLeftOffsetChanged?.invoke(state.leftContentOffset)
+    onRightOffsetChanged?.invoke(state.rightContentOffset)
+
+    DraggableScaffold(
+        state = state,
+        background = background,
+        contentUnderRight = contentUnderRight,
+        contentUnderLeft = contentUnderLeft,
+        contentOnTop = contentOnTop
+    )
+
+}
+
+/**
+ * This component provide api for layering two [Composable]s where the top one can be dragged to
+ * revel the bottom one
+ *
  * @param state the initial state of the DraggableScaffold, @see DraggableScaffoldState
  * @param background the background for the content behind
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
