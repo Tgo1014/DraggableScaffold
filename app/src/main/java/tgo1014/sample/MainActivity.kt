@@ -113,21 +113,18 @@ fun Demos() {
             }
         )
         // Animate background color by offset
-        var cardBackground by remember { mutableStateOf(Color.White) }
         val draggableState = rememberDraggableScaffoldState()
-
-        if (draggableState.leftContentOffset > 0) {
-            cardBackground = Color(
-
-                ColorUtils.blendARGB(Color.White.toArgb(), Color.Magenta.toArgb(), draggableState.leftContentOffset)
-            )
+        val cardBackground = when {
+            draggableState.leftContentOffset > 0 -> {
+                Color(ColorUtils.blendARGB(Color.White.toArgb(), Color.Magenta.toArgb(), draggableState.leftContentOffset))
+            }
+            draggableState.rightContentOffset > 0 -> {
+                Color(ColorUtils.blendARGB(Color.White.toArgb(), Color.Cyan.toArgb(), draggableState.rightContentOffset))
+            }
+            else -> Color.White
         }
 
-        if (draggableState.rightContentOffset > 0) {
-            cardBackground = Color(
-                ColorUtils.blendARGB(Color.White.toArgb(), Color.Cyan.toArgb(), draggableState.rightContentOffset)
-            )
-        }
+
         DraggableScaffold(
             contentUnderRight = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
             contentUnderLeft = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
@@ -145,9 +142,7 @@ fun Demos() {
             }
         )
         // Animate elevation by offset
-        var cardElevation by remember { mutableStateOf(4.dp) }
         val draggableStateElev = rememberDraggableScaffoldState()
-        cardElevation = offsetToElevation(draggableStateElev.rightContentOffset).dp
         DraggableScaffold(
             contentUnderRight = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
             state = draggableStateElev,
@@ -156,7 +151,7 @@ fun Demos() {
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth(),
-                    elevation = cardElevation
+                    elevation = offsetToElevation(draggableStateElev.rightContentOffset).dp
                 ) {
                     Text(text = "Drag to left to animate the elevation by offset", Modifier.padding(16.dp))
                 }
