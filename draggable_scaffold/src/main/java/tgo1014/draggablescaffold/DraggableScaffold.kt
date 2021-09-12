@@ -43,10 +43,7 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun DraggableScaffold(
-    leftExpanded: Boolean = false,
-    rightExpanded: Boolean = false,
-    onLeftOffsetChanged: ((Float) -> Unit)? = null,
-    onRightOffsetChanged: ((Float) -> Unit)? = null,
+    state: DraggableScaffoldState = rememberDraggableScaffoldState(),
     snapOffset: SnapOffset = SnapOffset(0.5f),
     background: Color = MaterialTheme.colors.surface,
     contentUnderLeft: @Composable () -> Unit = {},
@@ -54,10 +51,6 @@ fun DraggableScaffold(
     contentOnTop: @Composable () -> Unit,
 ) {
 
-    /**
-     * Current X offset of content on top
-     */
-    var offsetX by remember { mutableStateOf(0f) }
 
     /**
      * Duration of animation when the content is released
@@ -68,54 +61,15 @@ fun DraggableScaffold(
      * Animate the offset going back to start or end of content
      */
     val animatedOffsetX by animateFloatAsState(
-        targetValue = offsetX,
+        targetValue = state.offsetX,
         animationSpec = tween(animationDuration)
     ) { animationDuration = 0 }
-
-    /**
-     * The width of the layout under which defines how much the top view can be dragged
-     */
-    var contentUnderLeftWidth by remember { mutableStateOf(0.dp.value) }
-
-    /**
-     * The width of the layout under which defines how much the top view can be dragged
-     */
-    var contentUnderRightWidth by remember { mutableStateOf(0.dp.value) }
 
     /**
      * The height of the [contentOnTop]. This make sure the [contentUnderRight] and [contentUnderLeft]
      * height are not bigger than the [contentOnTop] height
      */
     var contentHeight by remember { mutableStateOf(0.dp) }
-
-    /**
-     * Move the top content by the X offset
-     */
-    fun setOffsetX(value: Float) {
-        offsetX = value
-        onLeftOffsetChanged?.invoke(offsetX / contentUnderLeftWidth)
-        onRightOffsetChanged?.invoke(offsetX / (contentUnderRightWidth * -1))
-    }
-
-    /**
-     * Set the content on the left width so it's not dragged further than [contentUnderLeft]'s size
-     */
-    fun onLeftContentMeasured(width: Int) {
-        contentUnderLeftWidth = width.dp.value
-        if (leftExpanded) {
-            offsetX = contentUnderLeftWidth
-        }
-    }
-
-    /**
-     * Set the content on the right width so it's not dragged further than [contentUnderRight]'s size
-     */
-    fun onRightContentMeasured(width: Int) {
-        contentUnderRightWidth = width.dp.value
-        if (rightExpanded) {
-            offsetX = contentUnderRightWidth * -1
-        }
-    }
 
     /**
      * Current density needed for setting properly the [contentHeight]
@@ -126,7 +80,7 @@ fun DraggableScaffold(
         Box(
             modifier = Modifier
                 .requiredHeightIn(max = contentHeight)
-                .onSizeChanged { onLeftContentMeasured(it.width) }
+                .onSizeChanged { state.onLeftContentMeasured(it.width) }
                 .background(background)
                 .align(Alignment.CenterStart),
             content = { contentUnderLeft() }
@@ -134,7 +88,7 @@ fun DraggableScaffold(
         Box(
             modifier = Modifier
                 .requiredHeightIn(max = contentHeight)
-                .onSizeChanged { onRightContentMeasured(it.width) }
+                .onSizeChanged { state.onRightContentMeasured(it.width) }
                 .background(background)
                 .align(Alignment.CenterEnd),
             content = { contentUnderRight() }
@@ -152,21 +106,24 @@ fun DraggableScaffold(
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dragAmount ->
-                            setOffsetX(
-                                (offsetX + dragAmount).coerceIn(contentUnderRightWidth * -1, contentUnderLeftWidth)
-                            )
+                            state.offsetX =
+                                (state.offsetX + dragAmount).coerceIn(
+                                    state.contentUnderRightWidth * -1,
+                                    state.contentUnderLeftWidth
+                                )
+
                             change.consumePositionChange()
                         },
                         onDragEnd = {
                             animationDuration = AnimationConstants.DefaultDurationMillis
-                            val leftOffset = offsetX / contentUnderLeftWidth
-                            val rightOffset = offsetX / contentUnderRightWidth * -1
+                            val leftOffset = state.offsetX / state.contentUnderLeftWidth
+                            val rightOffset = state.offsetX / state.contentUnderRightWidth * -1
                             val newOffset = when {
-                                leftOffset > 0 && leftOffset > snapOffset.offset -> contentUnderLeftWidth
-                                rightOffset > 0 && rightOffset > snapOffset.offset -> contentUnderRightWidth * -1
+                                leftOffset > 0 && leftOffset > snapOffset.offset -> state.contentUnderLeftWidth
+                                rightOffset > 0 && rightOffset > snapOffset.offset -> state.contentUnderRightWidth * -1
                                 else -> 0f
                             }
-                            setOffsetX(newOffset)
+                            state.offsetX = newOffset
                         }
                     )
                 }
