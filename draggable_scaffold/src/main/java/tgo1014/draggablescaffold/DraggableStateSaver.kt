@@ -3,7 +3,7 @@ package tgo1014.draggablescaffold
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 
-object Saver : Saver<DraggableScaffoldState, List<Any>> {
+internal object Saver : Saver<DraggableScaffoldState, List<Any>> {
     override fun SaverScope.save(value: DraggableScaffoldState): List<Any>? {
         return listOf(
             value.offsetX,
