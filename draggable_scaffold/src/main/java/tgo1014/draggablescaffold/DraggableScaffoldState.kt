@@ -1,15 +1,52 @@
 package tgo1014.draggablescaffold
 
-import androidx.compose.animation.core.AnimationConstants
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
-import androidx.compose.ui.input.pointer.consumePositionChange
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.dp
 
 class DraggableScaffoldState(
-    private val defaultExpandState: ExpandState = ExpandState.Collapsed,
-    private val snapOffset: SnapOffset = SnapOffset(0.5f),
+    internal val defaultExpandState: ExpandState = ExpandState.Collapsed,
+    internal val snapOffset: SnapOffset = SnapOffset(0.5f),
+    offsetX: Float = 0f,
 ) {
+
+
+    /**
+     * represents the current dragging left offset between 0 and 1
+     */
+    val leftContentOffset: Float
+        get() {
+            if (contentUnderLeftWidth == 0f) return 0f
+            return offsetX / ExpandState.ExpandedLeft.offset()
+
+        }
+
+    /**
+     * represents the current dragging right offset between 0 and 1
+     */
+    val rightContentOffset: Float
+        get() {
+            if (contentUnderRightWidth == 0f) return 0f
+            return offsetX / ExpandState.ExpandedRight.offset()
+        }
+
+
+    /**
+     * represents the current State of the Draggable scaffold based on current offset
+     */
+    val currentState: ExpandState
+        get() {
+            return when (offsetX) {
+                ExpandState.ExpandedLeft.offset() -> ExpandState.ExpandedLeft
+                ExpandState.ExpandedRight.offset() -> ExpandState.ExpandedRight
+                else -> ExpandState.Collapsed
+            }
+        }
+
+
     /**
      * The width of the layout under which defines how much the top view can be dragged
      */
@@ -23,35 +60,11 @@ class DraggableScaffoldState(
     /**
      * Current X offset of content on top
      */
-    internal var offsetX by mutableStateOf(0f)
-
-    val leftContentOffset: Float
-        get() {
-            if (contentUnderLeftWidth == 0f) return 0f
-            return offsetX / ExpandState.ExpandedLeft.offset()
-
-        }
-
-    val rightContentOffset: Float
-        get() {
-            if (contentUnderRightWidth == 0f) return 0f
-            return offsetX / ExpandState.ExpandedRight.offset()
-        }
+    internal var offsetX by mutableStateOf(offsetX)
 
 
-    val currentState: ExpandState
-        get() {
-            return when (offsetX) {
-                ExpandState.ExpandedLeft.offset() -> ExpandState.ExpandedLeft
-                ExpandState.ExpandedRight.offset() -> ExpandState.ExpandedRight
-                else -> ExpandState.Collapsed
-            }.also {
-                println("Current State: $it")
-            }
-        }
-
-    suspend fun animateToState(newState: ExpandState) {
-        animate(offsetX, newState.offset()) { currentValue, _ ->
+    suspend fun animateToState(newState: ExpandState, spec: AnimationSpec<Float> = tween(300)) {
+        animate(offsetX, newState.offset(), animationSpec = spec) { currentValue, _ ->
             offsetX = currentValue
         }
     }
@@ -83,7 +96,7 @@ class DraggableScaffoldState(
         }
     }
 
-    suspend fun onHandleDragEnd() {
+    internal suspend fun onHandleDragEnd(spec: AnimationSpec<Float>) {
         val leftOffset = leftContentOffset
         val rightOffset = rightContentOffset
         val newState = when {
@@ -91,7 +104,7 @@ class DraggableScaffoldState(
             rightOffset > 0 && rightOffset > snapOffset.offset -> ExpandState.ExpandedRight
             else -> ExpandState.Collapsed
         }
-        animateToState(newState)
+        animateToState(newState, spec)
     }
 
     internal fun onHandleDrag(dragAmount: Float) {
@@ -113,9 +126,13 @@ class DraggableScaffoldState(
 
 @Composable
 fun rememberDraggableScaffoldState(
-    defaultExpandState: ExpandState = ExpandState.Collapsed
+    defaultExpandState: ExpandState = ExpandState.Collapsed,
+    snapOffset: Float = 0.5f
 ): DraggableScaffoldState {
-    return remember {
-        DraggableScaffoldState(defaultExpandState)
+    return rememberSaveable(saver = Saver) {
+        DraggableScaffoldState(
+            defaultExpandState = defaultExpandState,
+            snapOffset = SnapOffset(snapOffset)
+        )
     }
 }

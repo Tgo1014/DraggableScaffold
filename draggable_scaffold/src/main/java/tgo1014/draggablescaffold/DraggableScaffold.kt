@@ -28,12 +28,6 @@ import kotlin.math.roundToInt
  * This component provide api for layering two [Composable]s where the top one can be dragged to
  * revel the bottom one
  *
- * @param leftExpanded determines if [Composable] on the bottom left should be showing at the start
- * @param rightExpanded determines if [Composable] on the bottom right should be showing at the start
- * @param onLeftOffsetChanged trigger the current dragging left offset between 0 and 1
- * @param onRightOffsetChanged trigger the current dragging right offset between 0 and 1
- * @param snapOffset a value between 0 and 1 that determine from which point the front view snaps
- *        to the start or the end
  * @param background the background for the content behind
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
  * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
@@ -43,6 +37,7 @@ import kotlin.math.roundToInt
 fun DraggableScaffold(
     state: DraggableScaffoldState = rememberDraggableScaffoldState(),
     background: Color = MaterialTheme.colors.surface,
+    snapSpec: AnimationSpec<Float> = tween(300),
     contentUnderLeft: @Composable () -> Unit = {},
     contentUnderRight: @Composable () -> Unit = {},
     contentOnTop: @Composable () -> Unit,
@@ -96,7 +91,7 @@ fun DraggableScaffold(
                         },
                         onDragEnd = {
                             scope.launch {
-                                state.onHandleDragEnd()
+                                state.onHandleDragEnd(snapSpec)
                             }
                         }
                     )

@@ -3,6 +3,7 @@ package tgo1014.sample
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,7 +46,7 @@ fun Demos() {
         val toggleState = rememberDraggableScaffoldState()
         val scope = rememberCoroutineScope()
         Button(onClick = { scope.launch {
-            toggleState.animateToState(ExpandState.ExpandedLeft)
+            toggleState.animateToState(ExpandState.ExpandedLeft, tween(1000))
         } }) {
             Text(text = "Expland")
         }
