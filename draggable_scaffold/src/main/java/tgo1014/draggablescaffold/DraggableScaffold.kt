@@ -1,6 +1,7 @@
 package tgo1014.draggablescaffold
 
 import androidx.compose.animation.core.AnimationConstants
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -10,11 +11,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +21,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
@@ -44,26 +42,13 @@ import kotlin.math.roundToInt
 @Composable
 fun DraggableScaffold(
     state: DraggableScaffoldState = rememberDraggableScaffoldState(),
-    snapOffset: SnapOffset = SnapOffset(0.5f),
     background: Color = MaterialTheme.colors.surface,
     contentUnderLeft: @Composable () -> Unit = {},
     contentUnderRight: @Composable () -> Unit = {},
     contentOnTop: @Composable () -> Unit,
 ) {
 
-
-    /**
-     * Duration of animation when the content is released
-     */
-    var animationDuration by remember { mutableStateOf(0) }
-
-    /**
-     * Animate the offset going back to start or end of content
-     */
-    val animatedOffsetX by animateFloatAsState(
-        targetValue = state.offsetX,
-        animationSpec = tween(animationDuration)
-    ) { animationDuration = 0 }
+    val scope = rememberCoroutineScope()
 
     /**
      * The height of the [contentOnTop]. This make sure the [contentUnderRight] and [contentUnderLeft]
@@ -96,7 +81,7 @@ fun DraggableScaffold(
         BoxWithConstraints(
             content = { contentOnTop() },
             modifier = Modifier
-                .offset { IntOffset((animatedOffsetX).roundToInt(), 0) }
+                .offset { IntOffset((state.offsetX).roundToInt(), 0) }
                 .background(MaterialTheme.colors.surface)
                 .onSizeChanged {
                     with(density) {
@@ -106,24 +91,13 @@ fun DraggableScaffold(
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dragAmount ->
-                            state.offsetX =
-                                (state.offsetX + dragAmount).coerceIn(
-                                    state.contentUnderRightWidth * -1,
-                                    state.contentUnderLeftWidth
-                                )
-
+                            state.onHandleDrag(dragAmount)
                             change.consumePositionChange()
                         },
                         onDragEnd = {
-                            animationDuration = AnimationConstants.DefaultDurationMillis
-                            val leftOffset = state.offsetX / state.contentUnderLeftWidth
-                            val rightOffset = state.offsetX / state.contentUnderRightWidth * -1
-                            val newOffset = when {
-                                leftOffset > 0 && leftOffset > snapOffset.offset -> state.contentUnderLeftWidth
-                                rightOffset > 0 && rightOffset > snapOffset.offset -> state.contentUnderRightWidth * -1
-                                else -> 0f
+                            scope.launch {
+                                state.onHandleDragEnd()
                             }
-                            state.offsetX = newOffset
                         }
                     )
                 }
