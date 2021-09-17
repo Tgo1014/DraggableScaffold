@@ -43,7 +43,7 @@ allprojects {
 ```gradle
 dependencies {
   ...
-  implementation "com.github.Tgo1014:DraggableScaffold:1.0.1"
+  implementation "com.github.Tgo1014:DraggableScaffold:1.1.0"
   ...
 }
 ```
