@@ -46,9 +46,14 @@ fun Demos() {
         val toggleState = rememberDraggableScaffoldState()
         val scope = rememberCoroutineScope()
         Button(onClick = { scope.launch {
-            toggleState.animateToState(ExpandState.ExpandedLeft, tween(1000))
+            if (toggleState.currentState == ExpandState.Collapsed) {
+                toggleState.animateToState(ExpandState.ExpandedLeft, tween(1000))
+            } else {
+                toggleState.animateToState(ExpandState.Collapsed)
+            }
         } }) {
-            Text(text = "Expland")
+            val title = if (toggleState.currentState == ExpandState.Collapsed) "Expand" else "Collapse"
+            Text(text = title)
         }
 
         // Hidden content left
