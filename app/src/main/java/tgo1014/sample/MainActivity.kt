@@ -4,10 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -40,15 +45,22 @@ class MainActivity : ComponentActivity() {
 fun Demos() {
 
 
-    Column(Modifier.fillMaxSize()) {
-
+    Column(Modifier
+        .fillMaxSize()
+        .verticalScroll(rememberScrollState())
+    ) {
 
         val toggleState = rememberDraggableScaffoldState()
         val scope = rememberCoroutineScope()
         Button(onClick = { scope.launch {
-            toggleState.animateToState(ExpandState.ExpandedLeft, tween(1000))
+            if (toggleState.currentState == ExpandState.Collapsed) {
+                toggleState.animateToState(ExpandState.ExpandedLeft, tween(1000))
+            } else {
+                toggleState.animateToState(ExpandState.Collapsed)
+            }
         } }) {
-            Text(text = "Expland")
+            val title = if (toggleState.currentState == ExpandState.Collapsed) "Expand" else "Collapse"
+            Text(text = title)
         }
 
         // Hidden content left
@@ -141,6 +153,7 @@ fun Demos() {
                 }
             }
         )
+        OldExample()
         // Animate elevation by offset
         val draggableStateElev = rememberDraggableScaffoldState()
         DraggableScaffold(
@@ -157,7 +170,7 @@ fun Demos() {
                 }
             }
         )
-        OldExample()
+        Spacer(modifier = Modifier.height(100.dp))
     }
 }
 

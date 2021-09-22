@@ -8,7 +8,7 @@ internal object Saver : Saver<DraggableScaffoldState, List<Any>> {
         return listOf(
             value.offsetX,
             value.snapOffset.offset,
-            value.defaultExpandState.ordinal
+            value.currentState.ordinal
         )
     }
 
