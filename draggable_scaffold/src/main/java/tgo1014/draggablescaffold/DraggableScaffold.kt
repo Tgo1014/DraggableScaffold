@@ -35,6 +35,7 @@ import kotlin.math.roundToInt
  * @param snapOffset a value between 0 and 1 that determine from which point the front view snaps
  *        to the start or the end
  * @param background the background for the content behind
+ * @param dragGestureEnabled determines whether or not the drag input from the user will processed or nor
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
  * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
  * @param contentOnTop the [Composable] that's going to be draw in from of the [contentUnderLeft] and [contentUnderRight]
