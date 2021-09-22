@@ -133,8 +133,8 @@ class DraggableScaffoldState(
         animateToState(newState, spec)
     }
 
-    internal fun onHandleDrag(dragAmount: Float) {
-        offsetX = (offsetX + dragAmount).coerceIn(
+    internal fun onHandleDrag(dragAmount: Float, resistance: DragResistance) {
+        offsetX = (offsetX + dragAmount * resistance.value).coerceIn(
             ExpandState.ExpandedRight.offset(),
             ExpandState.ExpandedLeft.offset()
         )
