@@ -44,6 +44,7 @@ import kotlin.math.roundToInt
 fun DraggableScaffold(
     leftExpanded: Boolean = false,
     rightExpanded: Boolean = false,
+    dragGestureEnabled: Boolean = true,
     onLeftOffsetChanged: ((Float) -> Unit)? = null,
     onRightOffsetChanged: ((Float) -> Unit)? = null,
     snapOffset: SnapOffset = SnapOffset(0.5f),
@@ -80,6 +81,7 @@ fun DraggableScaffold(
  *
  * @param state the initial state of the DraggableScaffold, @see DraggableScaffoldState
  * @param background the background for the content behind
+ * @param dragGestureEnabled determines whether or not the drag input from the user will processed or nor
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
  * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
  * @param contentOnTop the [Composable] that's going to be draw in from of the [contentUnderLeft] and [contentUnderRight]
@@ -89,6 +91,7 @@ fun DraggableScaffold(
     state: DraggableScaffoldState = rememberDraggableScaffoldState(),
     background: Color = MaterialTheme.colors.surface,
     snapSpec: AnimationSpec<Float> = tween(300),
+    dragGestureEnabled: Boolean = true,
     contentUnderLeft: @Composable () -> Unit = {},
     contentUnderRight: @Composable () -> Unit = {},
     contentOnTop: @Composable () -> Unit,
@@ -134,7 +137,7 @@ fun DraggableScaffold(
                         contentHeight = it.height.toDp()
                     }
                 }
-                .pointerInput(Unit) {
+                .then(if (dragGestureEnabled) Modifier.pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dragAmount ->
                             state.onHandleDrag(dragAmount)
@@ -146,7 +149,7 @@ fun DraggableScaffold(
                             }
                         }
                     )
-                }
+                } else Modifier)
         )
     }
 }

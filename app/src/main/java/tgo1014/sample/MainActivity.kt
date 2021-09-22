@@ -43,8 +43,6 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun Demos() {
-
-
     Column(Modifier
         .fillMaxSize()
         .verticalScroll(rememberScrollState())
@@ -66,6 +64,7 @@ fun Demos() {
         // Hidden content left
         DraggableScaffold(
             state = toggleState,
+            dragGestureEnabled = false,
             contentUnderLeft = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
             contentOnTop = {
                 Card(
@@ -73,7 +72,7 @@ fun Demos() {
                         .padding(4.dp)
                         .fillMaxWidth(),
                     elevation = 4.dp
-                ) { Text(text = "Drag this to show content on the left", Modifier.padding(16.dp)) }
+                ) { Text(text = "Manual Drag Disabled", Modifier.padding(16.dp)) }
             }
         )
         // Hidden content right
