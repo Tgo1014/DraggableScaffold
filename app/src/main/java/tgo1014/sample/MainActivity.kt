@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import kotlinx.coroutines.launch
+import tgo1014.draggablescaffold.DragResistance
 import tgo1014.draggablescaffold.DraggableScaffold
 import tgo1014.draggablescaffold.ExpandState
 import tgo1014.draggablescaffold.rememberDraggableScaffoldState
@@ -43,8 +44,6 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun Demos() {
-
-
     Column(Modifier
         .fillMaxSize()
         .verticalScroll(rememberScrollState())
@@ -66,6 +65,7 @@ fun Demos() {
         // Hidden content left
         DraggableScaffold(
             state = toggleState,
+            dragGestureEnabled = false,
             contentUnderLeft = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
             contentOnTop = {
                 Card(
@@ -73,7 +73,7 @@ fun Demos() {
                         .padding(4.dp)
                         .fillMaxWidth(),
                     elevation = 4.dp
-                ) { Text(text = "Drag this to show content on the left", Modifier.padding(16.dp)) }
+                ) { Text(text = "Manual Drag Disabled", Modifier.padding(16.dp)) }
             }
         )
         // Hidden content right
@@ -91,24 +91,26 @@ fun Demos() {
         DraggableScaffold(
             contentUnderRight = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
             state = rememberDraggableScaffoldState(ExpandState.ExpandedRight),
+            dragResistance = DragResistance.Strong,
             contentOnTop = {
                 Card(modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth(),
                     elevation = 4.dp
-                ) { Text(text = "This one show right by default", Modifier.padding(16.dp)) }
+                ) { Text(text = "This one show right by default, Hard to Drag", Modifier.padding(16.dp)) }
             }
         )
         // Show left by default
         DraggableScaffold(
             contentUnderLeft = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
             state = rememberDraggableScaffoldState(ExpandState.ExpandedLeft),
+            dragResistance = DragResistance.Weak,
             contentOnTop = {
                 Card(modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth(),
                     elevation = 4.dp
-                ) { Text(text = "This one show left by default", Modifier.padding(16.dp)) }
+                ) { Text(text = "This one show left by default, Easy to drag", Modifier.padding(16.dp)) }
             }
         )
         // Hidden content both sides

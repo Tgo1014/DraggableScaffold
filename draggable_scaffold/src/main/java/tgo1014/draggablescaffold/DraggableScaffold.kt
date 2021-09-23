@@ -1,8 +1,6 @@
 package tgo1014.draggablescaffold
 
-import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -38,12 +36,16 @@ import kotlin.math.roundToInt
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
  * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
  * @param contentOnTop the [Composable] that's going to be draw in from of the [contentUnderLeft] and [contentUnderRight]
+ * @param dragResistance specifies how hard it is to drag the [DraggableScaffold]
+ * @param dragGestureEnabled determines whether or not the drag input from the user will processed or not. [DragResistance.Zero] will be used in case drag is disabled
  */
 @Composable
 @Deprecated("Use DraggableScaffold with that accepts DraggableScaffoldState")
 fun DraggableScaffold(
     leftExpanded: Boolean = false,
     rightExpanded: Boolean = false,
+    dragGestureEnabled: Boolean = true,
+    dragResistance: DragResistance = DragResistance.Normal,
     onLeftOffsetChanged: ((Float) -> Unit)? = null,
     onRightOffsetChanged: ((Float) -> Unit)? = null,
     snapOffset: SnapOffset = SnapOffset(0.5f),
@@ -69,7 +71,9 @@ fun DraggableScaffold(
         background = background,
         contentUnderRight = contentUnderRight,
         contentUnderLeft = contentUnderLeft,
-        contentOnTop = contentOnTop
+        contentOnTop = contentOnTop,
+        dragGestureEnabled = dragGestureEnabled,
+        dragResistance = dragResistance
     )
 
 }
@@ -83,18 +87,22 @@ fun DraggableScaffold(
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
  * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
  * @param contentOnTop the [Composable] that's going to be draw in from of the [contentUnderLeft] and [contentUnderRight]
+ * @param dragResistance specifies how hard it is to drag the [DraggableScaffold]
+ * @param dragGestureEnabled determines whether or not the drag input from the user will processed or not. [DragResistance.Zero] will be used in case drag is disabled
  */
 @Composable
 fun DraggableScaffold(
     state: DraggableScaffoldState = rememberDraggableScaffoldState(),
     background: Color = MaterialTheme.colors.surface,
     snapSpec: AnimationSpec<Float> = tween(300),
+    dragGestureEnabled: Boolean = true,
+    dragResistance: DragResistance = DragResistance.Normal,
     contentUnderLeft: @Composable () -> Unit = {},
     contentUnderRight: @Composable () -> Unit = {},
     contentOnTop: @Composable () -> Unit,
 ) {
-
     val scope = rememberCoroutineScope()
+    val _dragResistance = if (dragGestureEnabled) dragResistance else DragResistance.Zero
 
     /**
      * The height of the [contentOnTop]. This make sure the [contentUnderRight] and [contentUnderLeft]
@@ -137,7 +145,7 @@ fun DraggableScaffold(
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dragAmount ->
-                            state.onHandleDrag(dragAmount)
+                            state.onHandleDrag(dragAmount, _dragResistance)
                             change.consumePositionChange()
                         },
                         onDragEnd = {
@@ -151,6 +159,9 @@ fun DraggableScaffold(
     }
 }
 
-class SnapOffset(value: Float) {
-    val offset = value.coerceIn(0f, 1f)
+@JvmInline
+value class SnapOffset(
+    private val value: Float
+) {
+    val offset get() = value.coerceIn(0f, 1f)
 }
