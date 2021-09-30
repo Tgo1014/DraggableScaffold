@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "tgo1014.draggablescaffold"
+        applicationId "tgo1014.sample"
         minSdk 21
         targetSdk 30
         versionCode 1
