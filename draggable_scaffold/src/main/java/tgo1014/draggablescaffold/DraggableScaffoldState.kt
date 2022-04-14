@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
  *
  * @param defaultExpandState initial state of the DraggableScaffold,
  * @param snapOffset specifies the offset of when Snap happens when drag ends
+ * @param allowExtremeSwipe specifies if content can be dragged all the way to the side
+ * @param extremeSnapOffset specifies the offset of when snap happens during extreme swipe
  *
  */
 @Composable
@@ -59,12 +61,21 @@ class DraggableScaffoldState(
             return offsetX / ExpandState.ExpandedRight.offset()
         }
 
+    /**
+     * Represents current  right offset in context of  full ("extreme") swipe
+     * Value between 0 and 1
+     */
     val rightFullOffset: Float
         get() {
             if (contentUnderRightWidth == 0f) return 0f
             return offsetX / ExpandState.ExpandedFullRight.offset()
         }
 
+
+    /**
+     * Represents current  left offset in context of  full ("extreme") swipe
+     * Value between 0 and 1
+     */
     val leftFullOffset: Float
         get() {
             if (contentUnderLeftWidth == 0f) return 0f
