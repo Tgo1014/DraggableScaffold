@@ -65,6 +65,12 @@ class DraggableScaffoldState(
             return offsetX / ExpandState.ExpandedFullRight.offset()
         }
 
+    val leftFullOffset: Float
+        get() {
+            if (contentUnderLeftWidth == 0f) return 0f
+            return offsetX / ExpandState.ExpandedFullLeft.offset()
+        }
+
     /**
      * represents the current State of the Draggable scaffold based on current offset
      */
@@ -74,14 +80,16 @@ class DraggableScaffoldState(
                 offsetX == ExpandState.ExpandedLeft.offset() && contentUnderLeftWidth != 0f -> ExpandState.ExpandedLeft
                 offsetX == ExpandState.ExpandedRight.offset() && contentUnderRightWidth != 0f -> ExpandState.ExpandedRight
                 offsetX == ExpandState.ExpandedFullRight.offset() && contentUnderRightWidth != 0f -> ExpandState.ExpandedFullRight
+                offsetX == ExpandState.ExpandedFullLeft.offset() && contentUnderLeftWidth != 0f -> ExpandState.ExpandedFullLeft
                 else -> ExpandState.Collapsed
             }
         }
 
+    /**
+     * Represents the next that will be assigned once the drag event ends
+     */
     val targetState: State<ExpandState>
-        get() = derivedStateOf { calculateTargetStateForOffset(offsetX) }
-
-
+        get() = derivedStateOf { calculateTargetStateForOffset() }
 
 
     /**
@@ -146,30 +154,21 @@ class DraggableScaffoldState(
 
     internal fun onContentMeasured(width: Float) {
         contentWidth = width
-        println("Content Measured: $width")
     }
 
     internal suspend fun onHandleDragEnd(spec: AnimationSpec<Float>) {
-        val leftOffset = leftContentOffset
-        val rightOffset = rightContentOffset
-        println("L: $leftOffset, R: $rightOffset")
-        val newState = when {
-            leftOffset > 0 && leftOffset > snapOffset.offset -> ExpandState.ExpandedLeft
-            rightOffset > 0 && rightFullOffset > snapOffset.offset  -> ExpandState.ExpandedFullRight
-            rightOffset > 0 && rightOffset > snapOffset.offset -> ExpandState.ExpandedRight
-            else -> ExpandState.Collapsed
-        }
-        animateToState(newState, spec)
+        val nextState = calculateTargetStateForOffset()
+        animateToState(nextState, spec)
     }
 
-    private fun calculateTargetStateForOffset(offsetX: Float) : ExpandState {
+    private fun calculateTargetStateForOffset() : ExpandState {
         val leftOffset = leftContentOffset
         val rightOffset = rightContentOffset
-        println("L: $leftOffset, R: $rightOffset")
         return when {
-            leftOffset > 0 && leftOffset > snapOffset.offset -> ExpandState.ExpandedLeft
-            rightOffset > 0 && rightFullOffset > snapOffset.offset  -> ExpandState.ExpandedFullRight
-            rightOffset > 0 && rightOffset > snapOffset.offset -> ExpandState.ExpandedRight
+            leftFullOffset > extremeSnapOffset -> ExpandState.ExpandedFullLeft
+            rightFullOffset > extremeSnapOffset  -> ExpandState.ExpandedFullRight
+            leftOffset > snapOffset -> ExpandState.ExpandedLeft
+            rightOffset > snapOffset -> ExpandState.ExpandedRight
             else -> ExpandState.Collapsed
         }
     }
@@ -178,9 +177,8 @@ class DraggableScaffoldState(
     internal fun onHandleDrag(dragAmount: Float, resistance: DragResistance) {
         offsetX = (offsetX + dragAmount * resistance.value).coerceIn(
             if (allowExtremeSwipe) ExpandState.ExpandedFullRight.offset() else ExpandState.ExpandedRight.offset(),
-            ExpandState.ExpandedLeft.offset()
+            if (allowExtremeSwipe) ExpandState.ExpandedFullLeft.offset() else ExpandState.ExpandedLeft.offset()
         )
-        println("New Offset: $offsetX")
     }
 
     private fun ExpandState.offset(): Float {
@@ -188,6 +186,7 @@ class DraggableScaffoldState(
             ExpandState.ExpandedRight ->  contentUnderRightWidth * -1
             ExpandState.ExpandedLeft -> contentUnderLeftWidth
             ExpandState.ExpandedFullRight -> contentWidth * -1
+            ExpandState.ExpandedFullLeft -> contentWidth
             else -> 0f
         }
     }

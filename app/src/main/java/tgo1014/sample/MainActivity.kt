@@ -262,19 +262,19 @@ fun OldExample() {
 @Composable
 @Preview
 private fun ExtremeSwipeExample() {
-    val state = rememberDraggableScaffoldState(allowExtremeSwipe = true)
+    val state = rememberDraggableScaffoldState(allowExtremeSwipe = true, extremeSnapOffset = 0.3f)
     val scope = rememberCoroutineScope()
     var visible by remember { mutableStateOf(true) }
-
+    println(state.targetState.value)
     val haptic = LocalHapticFeedback.current
-    val context = LocalContext.current
 
     LaunchedEffect(key1 = state.currentState) {
-        visible = state.currentState != ExpandState.ExpandedFullRight
+        visible =
+            !(state.currentState == ExpandState.ExpandedFullLeft || state.currentState == ExpandState.ExpandedFullRight)
     }
 
     LaunchedEffect(key1 = state.targetState.value, block = {
-        if (state.targetState.value == ExpandState.ExpandedFullRight) {
+        if (state.targetState.value == ExpandState.ExpandedFullRight || state.targetState.value == ExpandState.ExpandedFullLeft) {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         }
     })
@@ -286,6 +286,12 @@ private fun ExtremeSwipeExample() {
                 modifier = Modifier.background(MaterialTheme.colors.error),
                 state = state,
                 contentUnderRight = {
+                    Box(Modifier.height(70.dp)) {
+                        Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp))
+
+                    }
+                },
+                contentUnderLeft = {
                     Box(Modifier.height(70.dp)) {
                         Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp))
 

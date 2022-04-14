@@ -7,5 +7,6 @@ enum class ExpandState {
     Collapsed,
     ExpandedRight,
     ExpandedLeft,
-    ExpandedFullRight
+    ExpandedFullRight,
+    ExpandedFullLeft
 }

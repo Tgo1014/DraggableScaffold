@@ -157,9 +157,3 @@ fun DraggableScaffold(
     }
 }
 
-@JvmInline
-value class SnapOffset(
-    private val value: Float
-) {
-    val offset get() = value.coerceIn(0f, 1f)
-}
