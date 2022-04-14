@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -268,6 +269,7 @@ private fun ExtremeSwipeExample() {
     println(state.targetState.value)
     val haptic = LocalHapticFeedback.current
 
+
     LaunchedEffect(key1 = state.currentState) {
         visible =
             !(state.currentState == ExpandState.ExpandedFullLeft || state.currentState == ExpandState.ExpandedFullRight)
@@ -286,13 +288,13 @@ private fun ExtremeSwipeExample() {
                 modifier = Modifier.background(MaterialTheme.colors.error),
                 state = state,
                 contentUnderRight = {
-                    Box(Modifier.height(70.dp)) {
+                    Box(Modifier.height(70.dp).alpha(state.rightContentOffset)) {
                         Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp))
 
                     }
                 },
                 contentUnderLeft = {
-                    Box(Modifier.height(70.dp)) {
+                    Box(Modifier.height(70.dp).alpha(state.leftContentOffset)) {
                         Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp))
 
                     }
