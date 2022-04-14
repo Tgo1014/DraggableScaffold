@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -18,19 +19,25 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun rememberDraggableScaffoldState(
     defaultExpandState: ExpandState = ExpandState.Collapsed,
-    snapOffset: Float = 0.5f
-): DraggableScaffoldState {
+    snapOffset: Float = 0.5f,
+    extremeSnapOffset: Float = 0.5f,
+    allowExtremeSwipe: Boolean = false,
+    ): DraggableScaffoldState {
     return rememberSaveable(saver = Saver) {
         DraggableScaffoldState(
             defaultExpandState = defaultExpandState,
-            snapOffset = SnapOffset(snapOffset)
+            snapOffset = SnapOffset(snapOffset),
+            allowExtremeSwipe = allowExtremeSwipe,
+            extremeSnapOffset = SnapOffset(extremeSnapOffset)
         )
     }
 }
 
 class DraggableScaffoldState(
+    internal val allowExtremeSwipe: Boolean,
     internal val defaultExpandState: ExpandState = ExpandState.Collapsed,
     internal val snapOffset: SnapOffset = SnapOffset(0.5f),
+    internal val extremeSnapOffset: SnapOffset = SnapOffset(0.5f),
     offsetX: Float = 0f,
 ) {
     /**
@@ -52,6 +59,12 @@ class DraggableScaffoldState(
             return offsetX / ExpandState.ExpandedRight.offset()
         }
 
+    val rightFullOffset: Float
+        get() {
+            if (contentUnderRightWidth == 0f) return 0f
+            return offsetX / ExpandState.ExpandedFullRight.offset()
+        }
+
     /**
      * represents the current State of the Draggable scaffold based on current offset
      */
@@ -60,9 +73,15 @@ class DraggableScaffoldState(
             return when {
                 offsetX == ExpandState.ExpandedLeft.offset() && contentUnderLeftWidth != 0f -> ExpandState.ExpandedLeft
                 offsetX == ExpandState.ExpandedRight.offset() && contentUnderRightWidth != 0f -> ExpandState.ExpandedRight
+                offsetX == ExpandState.ExpandedFullRight.offset() && contentUnderRightWidth != 0f -> ExpandState.ExpandedFullRight
                 else -> ExpandState.Collapsed
             }
         }
+
+    val targetState: State<ExpandState>
+        get() = derivedStateOf { calculateTargetStateForOffset(offsetX) }
+
+
 
 
     /**
@@ -74,6 +93,9 @@ class DraggableScaffoldState(
      * The width of the layout under which defines how much the top view can be dragged
      */
     private var contentUnderRightWidth by mutableStateOf(0.dp.value)
+
+
+    private var contentWidth by mutableStateOf(0.dp.value)
 
     /**
      * Current X offset of content on top
@@ -122,28 +144,50 @@ class DraggableScaffoldState(
         }
     }
 
+    internal fun onContentMeasured(width: Float) {
+        contentWidth = width
+        println("Content Measured: $width")
+    }
+
     internal suspend fun onHandleDragEnd(spec: AnimationSpec<Float>) {
         val leftOffset = leftContentOffset
         val rightOffset = rightContentOffset
+        println("L: $leftOffset, R: $rightOffset")
         val newState = when {
             leftOffset > 0 && leftOffset > snapOffset.offset -> ExpandState.ExpandedLeft
+            rightOffset > 0 && rightFullOffset > snapOffset.offset  -> ExpandState.ExpandedFullRight
             rightOffset > 0 && rightOffset > snapOffset.offset -> ExpandState.ExpandedRight
             else -> ExpandState.Collapsed
         }
         animateToState(newState, spec)
     }
 
+    private fun calculateTargetStateForOffset(offsetX: Float) : ExpandState {
+        val leftOffset = leftContentOffset
+        val rightOffset = rightContentOffset
+        println("L: $leftOffset, R: $rightOffset")
+        return when {
+            leftOffset > 0 && leftOffset > snapOffset.offset -> ExpandState.ExpandedLeft
+            rightOffset > 0 && rightFullOffset > snapOffset.offset  -> ExpandState.ExpandedFullRight
+            rightOffset > 0 && rightOffset > snapOffset.offset -> ExpandState.ExpandedRight
+            else -> ExpandState.Collapsed
+        }
+    }
+
+
     internal fun onHandleDrag(dragAmount: Float, resistance: DragResistance) {
         offsetX = (offsetX + dragAmount * resistance.value).coerceIn(
-            ExpandState.ExpandedRight.offset(),
+            if (allowExtremeSwipe) ExpandState.ExpandedFullRight.offset() else ExpandState.ExpandedRight.offset(),
             ExpandState.ExpandedLeft.offset()
         )
+        println("New Offset: $offsetX")
     }
 
     private fun ExpandState.offset(): Float {
         return when (this) {
-            ExpandState.ExpandedRight -> contentUnderRightWidth * -1
+            ExpandState.ExpandedRight ->  contentUnderRightWidth * -1
             ExpandState.ExpandedLeft -> contentUnderLeftWidth
+            ExpandState.ExpandedFullRight -> contentWidth * -1
             else -> 0f
         }
     }
