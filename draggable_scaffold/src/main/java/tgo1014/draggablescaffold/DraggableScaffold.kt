@@ -140,7 +140,7 @@ fun DraggableScaffold(
                         state.onContentMeasured(it.width.toFloat())
                     }
                 }
-                .pointerInput(Unit) {
+                .pointerInput(_dragResistance) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dragAmount ->
                             state.onHandleDrag(dragAmount, _dragResistance)
