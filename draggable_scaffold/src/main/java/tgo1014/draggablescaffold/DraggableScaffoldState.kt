@@ -196,8 +196,8 @@ class DraggableScaffoldState(
         return when (this) {
             ExpandState.ExpandedRight ->  contentUnderRightWidth * -1
             ExpandState.ExpandedLeft -> contentUnderLeftWidth
-            ExpandState.ExpandedFullRight -> contentWidth * -1
-            ExpandState.ExpandedFullLeft -> contentWidth
+            ExpandState.ExpandedFullRight -> (contentWidth * -1).takeIf { contentUnderRightWidth != 0f } ?: 0f
+            ExpandState.ExpandedFullLeft -> contentWidth.takeIf { contentUnderLeftWidth != 0f } ?: 0f
             else -> 0f
         }
     }

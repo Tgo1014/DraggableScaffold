@@ -293,12 +293,6 @@ private fun ExtremeSwipeExample() {
 
                     }
                 },
-                contentUnderLeft = {
-                    Box(Modifier.height(70.dp).alpha(state.leftContentOffset)) {
-                        Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp))
-
-                    }
-                },
                 contentOnTop = {
                     Card(
                         modifier = Modifier
