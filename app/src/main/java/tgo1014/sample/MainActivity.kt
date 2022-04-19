@@ -8,6 +8,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -43,6 +46,33 @@ class MainActivity : ComponentActivity() {
             DraggableScaffoldTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     Demos()
+                }
+            }
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun ListPreview() {
+
+    val listItems = remember { mutableStateOf(List(30) { "Item $it" }) }
+
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        items(listItems.value) {
+            val state = rememberDraggableScaffoldState(inputs = arrayOf(it))
+            DraggableScaffold(
+                state = state,
+                contentUnderRight = {
+                    Button(onClick = { 
+                        listItems.value = listItems.value.toMutableList().apply {  remove(it)} }) {
+                        Text(text = "delete")
+                    }
+                }
+            ) {
+                Card(modifier = Modifier.fillMaxWidth().height(100.dp)) {
+                    Text(text = it, modifier = Modifier.padding(16.dp))
                 }
             }
         }
@@ -288,7 +318,10 @@ private fun ExtremeSwipeExample() {
                 modifier = Modifier.background(MaterialTheme.colors.error),
                 state = state,
                 contentUnderRight = {
-                    Box(Modifier.height(70.dp).alpha(state.rightContentOffset)) {
+                    Box(
+                        Modifier
+                            .height(70.dp)
+                            .alpha(state.rightContentOffset)) {
                         Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp))
 
                     }
