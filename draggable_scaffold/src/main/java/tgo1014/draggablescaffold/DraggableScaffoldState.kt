@@ -68,8 +68,9 @@ class DraggableScaffoldState(
      */
     val rightFullOffset: Float
         get() {
-            if (contentUnderRightWidth == 0f) return 0f
-            return offsetX / ExpandState.ExpandedFullRight.offset()
+            val offset = ExpandState.ExpandedFullRight.offset()
+            if (offset == 0f) return 0f
+            return offsetX / offset
         }
 
 
@@ -79,8 +80,9 @@ class DraggableScaffoldState(
      */
     val leftFullOffset: Float
         get() {
-            if (contentUnderLeftWidth == 0f) return 0f
-            return offsetX / ExpandState.ExpandedFullLeft.offset()
+            val offset = ExpandState.ExpandedFullLeft.offset()
+            if (offset == 0f) return 0f
+            return offsetX / offset
         }
 
     /**
