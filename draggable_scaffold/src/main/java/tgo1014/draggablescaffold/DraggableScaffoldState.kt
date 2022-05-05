@@ -90,6 +90,8 @@ class DraggableScaffoldState(
      */
     val currentState: ExpandState
         get() {
+            if (contentWidth == 0f) return ExpandState.Collapsed
+
             return when {
                 offsetX == ExpandState.ExpandedLeft.offset() && contentUnderLeftWidth != 0f -> ExpandState.ExpandedLeft
                 offsetX == ExpandState.ExpandedRight.offset() && contentUnderRightWidth != 0f -> ExpandState.ExpandedRight

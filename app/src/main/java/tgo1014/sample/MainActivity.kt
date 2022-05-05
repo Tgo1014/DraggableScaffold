@@ -57,11 +57,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ListPreview() {
 
-    val listItems = remember { mutableStateOf(List(30) { "Item $it" }) }
+    val listItems = remember { mutableStateOf(List(100) { "Item $it" }) }
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         items(listItems.value) {
-            val state = rememberDraggableScaffoldState(inputs = arrayOf(it))
+            val state = rememberDraggableScaffoldState(inputs = arrayOf(it), allowExtremeSwipe = true)
+            LaunchedEffect(key1 = state.currentState) {
+                println("State: ${state.currentState}")
+            }
             DraggableScaffold(
                 state = state,
                 contentUnderRight = {
@@ -71,9 +74,31 @@ fun ListPreview() {
                     }
                 }
             ) {
-                Card(modifier = Modifier.fillMaxWidth().height(100.dp)) {
-                    Text(text = it, modifier = Modifier.padding(16.dp))
+                Box {
+                    Card(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)) {
+                        Text(text = it, modifier = Modifier.padding(16.dp))
+                    }
+                    Card(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)) {
+                        Text(text = it, modifier = Modifier.padding(16.dp))
+                    }
+                    Card(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)) {
+                        Text(text = it, modifier = Modifier.padding(16.dp))
+                    }
+
+                    Card(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)) {
+                        Text(text = it, modifier = Modifier.padding(16.dp))
+                    }
+
                 }
+
             }
         }
     }
