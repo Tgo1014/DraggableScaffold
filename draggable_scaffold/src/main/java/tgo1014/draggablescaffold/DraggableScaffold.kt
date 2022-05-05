@@ -49,18 +49,19 @@ fun DraggableScaffold(
     onLeftOffsetChanged: ((Float) -> Unit)? = null,
     onRightOffsetChanged: ((Float) -> Unit)? = null,
     snapOffset: SnapOffset = SnapOffset(0.5f),
-    background: Color = MaterialTheme.colors.surface,
     contentUnderLeft: @Composable () -> Unit = {},
     contentUnderRight: @Composable () -> Unit = {},
     contentOnTop: @Composable () -> Unit,
 ) {
     val state = rememberDraggableScaffoldState(
-        when {
+        allowExtremeSwipe = false,
+        defaultExpandState = when {
             leftExpanded -> ExpandState.ExpandedLeft
             rightExpanded -> ExpandState.ExpandedRight
             else -> ExpandState.Collapsed
         },
-        snapOffset = snapOffset.offset
+        snapOffset = snapOffset.offset,
+
     )
 
     onLeftOffsetChanged?.invoke(state.leftContentOffset)
@@ -68,7 +69,6 @@ fun DraggableScaffold(
 
     DraggableScaffold(
         state = state,
-        background = background,
         contentUnderRight = contentUnderRight,
         contentUnderLeft = contentUnderLeft,
         contentOnTop = contentOnTop,
@@ -92,8 +92,8 @@ fun DraggableScaffold(
  */
 @Composable
 fun DraggableScaffold(
+    modifier: Modifier = Modifier,
     state: DraggableScaffoldState = rememberDraggableScaffoldState(),
-    background: Color = MaterialTheme.colors.surface,
     snapSpec: AnimationSpec<Float> = tween(300),
     dragGestureEnabled: Boolean = true,
     dragResistance: DragResistance = DragResistance.Normal,
@@ -115,12 +115,11 @@ fun DraggableScaffold(
      */
     val density = LocalDensity.current
 
-    Box {
+    Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .requiredHeightIn(max = contentHeight)
                 .onSizeChanged { state.onLeftContentMeasured(it.width) }
-                .background(background)
                 .align(Alignment.CenterStart),
             content = { contentUnderLeft() }
         )
@@ -128,7 +127,6 @@ fun DraggableScaffold(
             modifier = Modifier
                 .requiredHeightIn(max = contentHeight)
                 .onSizeChanged { state.onRightContentMeasured(it.width) }
-                .background(background)
                 .align(Alignment.CenterEnd),
             content = { contentUnderRight() }
         )
@@ -136,13 +134,13 @@ fun DraggableScaffold(
             content = { contentOnTop() },
             modifier = Modifier
                 .offset { IntOffset((state.offsetX).roundToInt(), 0) }
-                .background(MaterialTheme.colors.surface)
                 .onSizeChanged {
                     with(density) {
                         contentHeight = it.height.toDp()
+                        state.onContentMeasured(it.width.toFloat())
                     }
                 }
-                .pointerInput(_dragResistance) {
+                .pointerInput(_dragResistance, state) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dragAmount ->
                             state.onHandleDrag(dragAmount, _dragResistance)
@@ -159,9 +157,3 @@ fun DraggableScaffold(
     }
 }
 
-@JvmInline
-value class SnapOffset(
-    private val value: Float
-) {
-    val offset get() = value.coerceIn(0f, 1f)
-}
