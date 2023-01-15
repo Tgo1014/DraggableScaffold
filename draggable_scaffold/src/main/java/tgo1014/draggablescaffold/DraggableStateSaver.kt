@@ -9,7 +9,7 @@ internal object Saver : Saver<DraggableScaffoldState, List<Any>> {
             value.offsetX,
             value.snapOffset.offset,
             value.currentState.ordinal,
-            value.allowExtremeSwipe
+            value.allowFullWidthSwipe
         )
     }
 
@@ -18,7 +18,7 @@ internal object Saver : Saver<DraggableScaffoldState, List<Any>> {
             offsetX = value[0] as Float,
             snapOffset = SnapOffset(value[1] as Float),
             defaultExpandState = ExpandState.values()[value[2] as Int],
-            allowExtremeSwipe = value[3] as Boolean
+            allowFullWidthSwipe = value[3] as Boolean
         )
     }
 }

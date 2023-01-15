@@ -7,7 +7,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,7 +59,7 @@ fun ListPreview() {
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         items(listItems.value) {
-            val state = rememberDraggableScaffoldState(inputs = arrayOf(it), allowExtremeSwipe = true)
+            val state = rememberDraggableScaffoldState(inputs = arrayOf(it), allowFullWidthSwipe = true)
             LaunchedEffect(key1 = state.currentState) {
                 println("State: ${state.currentState}")
             }
@@ -113,7 +111,7 @@ fun Demos() {
             .verticalScroll(rememberScrollState())
     ) {
 
-        ExtremeSwipeExample()
+        FullWidthSwipeExample()
 
         val toggleState = rememberDraggableScaffoldState()
         val scope = rememberCoroutineScope()
@@ -317,8 +315,8 @@ fun OldExample() {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 @Preview
-private fun ExtremeSwipeExample() {
-    val state = rememberDraggableScaffoldState(allowExtremeSwipe = true, extremeSnapOffset = 0.3f)
+private fun FullWidthSwipeExample() {
+    val state = rememberDraggableScaffoldState(allowFullWidthSwipe = true, fullWidthSwipeOffset = 0.3f)
     val scope = rememberCoroutineScope()
     var visible by remember { mutableStateOf(true) }
     println(state.targetState.value)

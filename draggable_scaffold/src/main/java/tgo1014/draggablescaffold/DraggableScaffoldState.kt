@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -14,16 +13,16 @@ import androidx.compose.ui.unit.dp
  *
  * @param defaultExpandState initial state of the DraggableScaffold,
  * @param snapOffset specifies the offset of when Snap happens when drag ends
- * @param allowExtremeSwipe specifies if content can be dragged all the way to the side
- * @param extremeSnapOffset specifies the offset of when snap happens during extreme swipe
+ * @param allowFullWidthSwipe specifies if content can be dragged all the way to the side
+ * @param fullWidthSwipeOffset specifies the offset of when snap happens during full width swipe
  *
  */
 @Composable
 fun rememberDraggableScaffoldState(
     defaultExpandState: ExpandState = ExpandState.Collapsed,
     snapOffset: Float = 0.5f,
-    extremeSnapOffset: Float = 0.5f,
-    allowExtremeSwipe: Boolean = false,
+    fullWidthSwipeOffset: Float = 0.5f,
+    allowFullWidthSwipe: Boolean = false,
     key: String? = null,
     vararg inputs: Any
     ): DraggableScaffoldState {
@@ -31,17 +30,17 @@ fun rememberDraggableScaffoldState(
         DraggableScaffoldState(
             defaultExpandState = defaultExpandState,
             snapOffset = SnapOffset(snapOffset),
-            allowExtremeSwipe = allowExtremeSwipe,
-            extremeSnapOffset = SnapOffset(extremeSnapOffset),
+            allowFullWidthSwipe = allowFullWidthSwipe,
+            fullWidthSwipeOffset = SnapOffset(fullWidthSwipeOffset),
         )
     }
 }
 
 class DraggableScaffoldState(
-    internal val allowExtremeSwipe: Boolean,
+    internal val allowFullWidthSwipe: Boolean,
     internal val defaultExpandState: ExpandState = ExpandState.Collapsed,
     internal val snapOffset: SnapOffset = SnapOffset(0.5f),
-    internal val extremeSnapOffset: SnapOffset = SnapOffset(0.5f),
+    internal val fullWidthSwipeOffset: SnapOffset = SnapOffset(0.5f),
     offsetX: Float = 0f,
 ) {
     /**
@@ -64,7 +63,7 @@ class DraggableScaffoldState(
         }
 
     /**
-     * Represents current  right offset in context of  full ("extreme") swipe
+     * Represents current  right offset in context of full width swipe
      * Value between 0 and 1
      */
     val rightFullOffset: Float
@@ -76,7 +75,7 @@ class DraggableScaffoldState(
 
 
     /**
-     * Represents current  left offset in context of  full ("extreme") swipe
+     * Represents current  left offset in context of full width swipe
      * Value between 0 and 1
      */
     val leftFullOffset: Float
@@ -182,8 +181,8 @@ class DraggableScaffoldState(
         val leftOffset = leftContentOffset
         val rightOffset = rightContentOffset
         return when {
-            leftFullOffset > extremeSnapOffset -> ExpandState.ExpandedFullLeft
-            rightFullOffset > extremeSnapOffset  -> ExpandState.ExpandedFullRight
+            leftFullOffset > fullWidthSwipeOffset -> ExpandState.ExpandedFullLeft
+            rightFullOffset > fullWidthSwipeOffset  -> ExpandState.ExpandedFullRight
             leftOffset > snapOffset -> ExpandState.ExpandedLeft
             rightOffset > snapOffset -> ExpandState.ExpandedRight
             else -> ExpandState.Collapsed
@@ -193,8 +192,8 @@ class DraggableScaffoldState(
 
     internal fun onHandleDrag(dragAmount: Float, resistance: DragResistance) {
         offsetX = (offsetX + dragAmount * resistance.value).coerceIn(
-            if (allowExtremeSwipe) ExpandState.ExpandedFullRight.offset() else ExpandState.ExpandedRight.offset(),
-            if (allowExtremeSwipe) ExpandState.ExpandedFullLeft.offset() else ExpandState.ExpandedLeft.offset()
+            if (allowFullWidthSwipe) ExpandState.ExpandedFullRight.offset() else ExpandState.ExpandedRight.offset(),
+            if (allowFullWidthSwipe) ExpandState.ExpandedFullLeft.offset() else ExpandState.ExpandedLeft.offset()
         )
     }
 
