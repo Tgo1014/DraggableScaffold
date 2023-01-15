@@ -2,7 +2,6 @@ package tgo1014.draggablescaffold
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,8 +10,9 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.consumePositionChange
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -58,7 +58,6 @@ fun DraggableScaffold(
             else -> ExpandState.Collapsed
         },
         snapOffset = snapOffset.offset,
-
     )
 
     onLeftOffsetChanged?.invoke(state.leftContentOffset)
@@ -80,7 +79,6 @@ fun DraggableScaffold(
  * revel the bottom one
  *
  * @param state the initial state of the DraggableScaffold, @see DraggableScaffoldState
- * @param background the background for the content behind
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
  * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
  * @param contentOnTop the [Composable] that's going to be draw in from of the [contentUnderLeft] and [contentUnderRight]
@@ -141,7 +139,7 @@ fun DraggableScaffold(
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dragAmount ->
                             state.onHandleDrag(dragAmount, _dragResistance)
-                            change.consumePositionChange()
+                            if (change.positionChange() != Offset.Zero) change.consume()
                         },
                         onDragEnd = {
                             scope.launch {

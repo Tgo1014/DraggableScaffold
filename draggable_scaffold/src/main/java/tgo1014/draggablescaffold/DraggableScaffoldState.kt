@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
  * @param snapOffset specifies the offset of when Snap happens when drag ends
  * @param allowFullWidthSwipe specifies if content can be dragged all the way to the side
  * @param fullWidthSwipeOffset specifies the offset of when snap happens during full width swipe
- *
  */
 @Composable
 fun rememberDraggableScaffoldState(
@@ -25,7 +24,7 @@ fun rememberDraggableScaffoldState(
     allowFullWidthSwipe: Boolean = false,
     key: String? = null,
     vararg inputs: Any
-    ): DraggableScaffoldState {
+): DraggableScaffoldState {
     return rememberSaveable(saver = Saver, inputs = inputs, key = key) {
         DraggableScaffoldState(
             defaultExpandState = defaultExpandState,
@@ -73,7 +72,6 @@ class DraggableScaffoldState(
             return offsetX / offset
         }
 
-
     /**
      * Represents current  left offset in context of full width swipe
      * Value between 0 and 1
@@ -91,7 +89,6 @@ class DraggableScaffoldState(
     val currentState: ExpandState
         get() {
             if (contentWidth == 0f) return ExpandState.Collapsed
-
             return when {
                 offsetX == ExpandState.ExpandedLeft.offset() && contentUnderLeftWidth != 0f -> ExpandState.ExpandedLeft
                 offsetX == ExpandState.ExpandedRight.offset() && contentUnderRightWidth != 0f -> ExpandState.ExpandedRight
@@ -107,7 +104,6 @@ class DraggableScaffoldState(
     val targetState: State<ExpandState>
         get() = derivedStateOf { calculateTargetStateForOffset() }
 
-
     /**
      * The width of the layout under which defines how much the top view can be dragged
      */
@@ -118,14 +114,12 @@ class DraggableScaffoldState(
      */
     private var contentUnderRightWidth by mutableStateOf(0.dp.value)
 
-
     private var contentWidth by mutableStateOf(0.dp.value)
 
     /**
      * Current X offset of content on top
      */
     internal var offsetX by mutableStateOf(offsetX)
-
 
     /**
      * Animates to the new [ExpandState] using the [AnimationSpec]
@@ -148,18 +142,17 @@ class DraggableScaffoldState(
     }
 
     /**
-     * Set the content on the left width so it's not dragged further than [contentUnderLeft]'s size
+     * Set the content on the left width so it's not dragged further than [contentUnderLeftWidth]'s size
      */
     internal fun onLeftContentMeasured(width: Int) {
         if (contentUnderLeftWidth != width.dp.value) {
             contentUnderLeftWidth = width.dp.value
             setExpandState(defaultExpandState)
         }
-
     }
 
     /**
-     * Set the content on the right width so it's not dragged further than [contentUnderRight]'s size
+     * Set the content on the right width so it's not dragged further than [contentUnderRightWidth]'s size
      */
     internal fun onRightContentMeasured(width: Int) {
         if (contentUnderRightWidth != width.dp.value) {
@@ -177,18 +170,17 @@ class DraggableScaffoldState(
         animateToState(nextState, spec)
     }
 
-    private fun calculateTargetStateForOffset() : ExpandState {
+    private fun calculateTargetStateForOffset(): ExpandState {
         val leftOffset = leftContentOffset
         val rightOffset = rightContentOffset
         return when {
             leftFullOffset > fullWidthSwipeOffset -> ExpandState.ExpandedFullLeft
-            rightFullOffset > fullWidthSwipeOffset  -> ExpandState.ExpandedFullRight
+            rightFullOffset > fullWidthSwipeOffset -> ExpandState.ExpandedFullRight
             leftOffset > snapOffset -> ExpandState.ExpandedLeft
             rightOffset > snapOffset -> ExpandState.ExpandedRight
             else -> ExpandState.Collapsed
         }
     }
-
 
     internal fun onHandleDrag(dragAmount: Float, resistance: DragResistance) {
         offsetX = (offsetX + dragAmount * resistance.value).coerceIn(
@@ -199,7 +191,7 @@ class DraggableScaffoldState(
 
     private fun ExpandState.offset(): Float {
         return when (this) {
-            ExpandState.ExpandedRight ->  contentUnderRightWidth * -1
+            ExpandState.ExpandedRight -> contentUnderRightWidth * -1
             ExpandState.ExpandedLeft -> contentUnderLeftWidth
             ExpandState.ExpandedFullRight -> (contentWidth * -1).takeIf { contentUnderRightWidth != 0f } ?: 0f
             ExpandState.ExpandedFullLeft -> contentWidth.takeIf { contentUnderLeftWidth != 0f } ?: 0f
