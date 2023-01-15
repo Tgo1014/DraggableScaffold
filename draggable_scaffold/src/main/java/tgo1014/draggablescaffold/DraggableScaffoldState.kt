@@ -24,14 +24,15 @@ fun rememberDraggableScaffoldState(
     snapOffset: Float = 0.5f,
     extremeSnapOffset: Float = 0.5f,
     allowExtremeSwipe: Boolean = false,
+    key: String? = null,
     vararg inputs: Any
     ): DraggableScaffoldState {
-    return rememberSaveable(saver = Saver, inputs = inputs) {
+    return rememberSaveable(saver = Saver, inputs = inputs, key = key) {
         DraggableScaffoldState(
             defaultExpandState = defaultExpandState,
             snapOffset = SnapOffset(snapOffset),
             allowExtremeSwipe = allowExtremeSwipe,
-            extremeSnapOffset = SnapOffset(extremeSnapOffset)
+            extremeSnapOffset = SnapOffset(extremeSnapOffset),
         )
     }
 }
