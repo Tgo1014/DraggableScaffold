@@ -1,5 +1,6 @@
 package tgo1014.sample
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,7 +58,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun Demos() {
     Column(
@@ -64,9 +65,7 @@ fun Demos() {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-
         FullWidthSwipeExample()
-
         val toggleState = rememberDraggableScaffoldState()
         val scope = rememberCoroutineScope()
         Button(
@@ -88,7 +87,6 @@ fun Demos() {
                 Text(text = title)
             }
         )
-
         // Hidden content left
         DraggableScaffold(
             state = toggleState,
@@ -222,26 +220,23 @@ fun Demos() {
             draggableState.leftContentOffset > 0 -> {
                 Color(
                     ColorUtils.blendARGB(
-                        Color.White.toArgb(),
+                        MaterialTheme.colors.surface.toArgb(),
                         Color.Magenta.toArgb(),
                         draggableState.leftContentOffset
                     )
                 )
             }
-
             draggableState.rightContentOffset > 0 -> {
                 Color(
                     ColorUtils.blendARGB(
-                        Color.White.toArgb(),
+                        MaterialTheme.colors.surface.toArgb(),
                         Color.Cyan.toArgb(),
                         draggableState.rightContentOffset
                     )
                 )
             }
-
-            else -> Color.White
+            else -> MaterialTheme.colors.surface
         }
-
         DraggableScaffold(
             contentUnderRight = {
                 Text(
@@ -272,7 +267,6 @@ fun Demos() {
                 )
             }
         )
-        OldExample()
         // Animate elevation by offset
         val draggableStateElev = rememberDraggableScaffoldState()
         DraggableScaffold(
@@ -303,44 +297,6 @@ fun Demos() {
 }
 
 @Composable
-fun OldExample() {
-    // Animate background color by offset
-    var cardBackground by remember { mutableStateOf(Color.White) }
-    DraggableScaffold(
-        leftExpanded = true,
-        contentUnderRight = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
-        contentUnderLeft = { Text(text = "Hello \uD83D\uDE03", Modifier.padding(4.dp)) },
-        onLeftOffsetChanged = {
-            if (it < 0) return@DraggableScaffold
-            cardBackground = Color(
-                ColorUtils.blendARGB(Color.White.toArgb(), Color.Magenta.toArgb(), it)
-            )
-        },
-        onRightOffsetChanged = {
-            if (it < 0) return@DraggableScaffold
-            cardBackground = Color(
-                ColorUtils.blendARGB(Color.White.toArgb(), Color.Cyan.toArgb(), it)
-            )
-        },
-        contentOnTop = {
-            Card(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth(),
-                backgroundColor = cardBackground,
-                elevation = 4.dp
-            ) {
-                Text(
-                    text = "Drag left or right to animate the background color",
-                    Modifier.padding(16.dp)
-                )
-            }
-        }
-    )
-}
-
-@Composable
-@Preview
 private fun FullWidthSwipeExample() {
     val state = rememberDraggableScaffoldState(
         allowFullWidthSwipe = true,
@@ -349,18 +305,15 @@ private fun FullWidthSwipeExample() {
     val scope = rememberCoroutineScope()
     var visible by remember { mutableStateOf(true) }
     val haptic = LocalHapticFeedback.current
-
     LaunchedEffect(key1 = state.currentState) {
         visible = !(state.currentState == ExpandState.ExpandedFullLeft
             || state.currentState == ExpandState.ExpandedFullRight)
     }
-
     LaunchedEffect(key1 = state.targetState.value) {
         if (state.targetState.value == ExpandState.ExpandedFullRight || state.targetState.value == ExpandState.ExpandedFullLeft) {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         }
     }
-
     Column {
         AnimatedVisibility(visible) {
             DraggableScaffold(
@@ -392,12 +345,21 @@ private fun FullWidthSwipeExample() {
                 modifier = Modifier.background(MaterialTheme.colors.error),
             )
         }
-
         Button(
             onClick = { scope.launch { state.animateToState(ExpandState.Collapsed) } },
             content = { Text(text = "Reset") }
         )
     }
+}
+
+@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
+)
+@Composable
+private fun DemosPreview() = DraggableScaffoldTheme {
+    Demos()
 }
 
 private fun offsetToElevation(offset: Float): Float {

@@ -23,7 +23,7 @@ fun rememberDraggableScaffoldState(
     fullWidthSwipeOffset: Float = 0.5f,
     allowFullWidthSwipe: Boolean = false,
     key: String? = null,
-    vararg inputs: Any
+    vararg inputs: Any,
 ): DraggableScaffoldState {
     return rememberSaveable(saver = Saver, inputs = inputs, key = key) {
         DraggableScaffoldState(
