@@ -50,58 +50,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-@Preview
-@Composable
-fun ListPreview() {
-
-    val listItems = remember { mutableStateOf(List(100) { "Item $it" }) }
-
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        items(listItems.value) {
-            val state = rememberDraggableScaffoldState(inputs = arrayOf(it), allowFullWidthSwipe = true)
-            LaunchedEffect(key1 = state.currentState) {
-                println("State: ${state.currentState}")
-            }
-            DraggableScaffold(
-                state = state,
-                contentUnderRight = {
-                    Button(onClick = { 
-                        listItems.value = listItems.value.toMutableList().apply {  remove(it)} }) {
-                        Text(text = "delete")
-                    }
-                }
-            ) {
-                Box {
-                    Card(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)) {
-                        Text(text = it, modifier = Modifier.padding(16.dp))
-                    }
-                    Card(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)) {
-                        Text(text = it, modifier = Modifier.padding(16.dp))
-                    }
-                    Card(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)) {
-                        Text(text = it, modifier = Modifier.padding(16.dp))
-                    }
-
-                    Card(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)) {
-                        Text(text = it, modifier = Modifier.padding(16.dp))
-                    }
-
-                }
-
-            }
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun Demos() {
