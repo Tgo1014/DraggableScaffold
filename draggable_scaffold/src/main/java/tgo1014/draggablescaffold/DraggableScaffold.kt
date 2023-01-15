@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -32,7 +30,6 @@ import kotlin.math.roundToInt
  * @param onRightOffsetChanged trigger the current dragging right offset between 0 and 1
  * @param snapOffset a value between 0 and 1 that determine from which point the front view snaps
  *        to the start or the end
- * @param background the background for the content behind
  * @param contentUnderLeft the [Composable] that's going to show up in the left side behind the [contentOnTop]
  * @param contentUnderRight the [Composable] that's going to show up in the right side behind the [contentOnTop]
  * @param contentOnTop the [Composable] that's going to be draw in from of the [contentUnderLeft] and [contentUnderRight]
@@ -49,18 +46,19 @@ fun DraggableScaffold(
     onLeftOffsetChanged: ((Float) -> Unit)? = null,
     onRightOffsetChanged: ((Float) -> Unit)? = null,
     snapOffset: SnapOffset = SnapOffset(0.5f),
-    background: Color = MaterialTheme.colors.surface,
     contentUnderLeft: @Composable () -> Unit = {},
     contentUnderRight: @Composable () -> Unit = {},
     contentOnTop: @Composable () -> Unit,
 ) {
     val state = rememberDraggableScaffoldState(
-        when {
+        allowFullWidthSwipe = false,
+        defaultExpandState = when {
             leftExpanded -> ExpandState.ExpandedLeft
             rightExpanded -> ExpandState.ExpandedRight
             else -> ExpandState.Collapsed
         },
-        snapOffset = snapOffset.offset
+        snapOffset = snapOffset.offset,
+
     )
 
     onLeftOffsetChanged?.invoke(state.leftContentOffset)
@@ -68,7 +66,6 @@ fun DraggableScaffold(
 
     DraggableScaffold(
         state = state,
-        background = background,
         contentUnderRight = contentUnderRight,
         contentUnderLeft = contentUnderLeft,
         contentOnTop = contentOnTop,
@@ -92,8 +89,8 @@ fun DraggableScaffold(
  */
 @Composable
 fun DraggableScaffold(
+    modifier: Modifier = Modifier,
     state: DraggableScaffoldState = rememberDraggableScaffoldState(),
-    background: Color = MaterialTheme.colors.surface,
     snapSpec: AnimationSpec<Float> = tween(300),
     dragGestureEnabled: Boolean = true,
     dragResistance: DragResistance = DragResistance.Normal,
@@ -115,12 +112,11 @@ fun DraggableScaffold(
      */
     val density = LocalDensity.current
 
-    Box {
+    Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .requiredHeightIn(max = contentHeight)
                 .onSizeChanged { state.onLeftContentMeasured(it.width) }
-                .background(background)
                 .align(Alignment.CenterStart),
             content = { contentUnderLeft() }
         )
@@ -128,7 +124,6 @@ fun DraggableScaffold(
             modifier = Modifier
                 .requiredHeightIn(max = contentHeight)
                 .onSizeChanged { state.onRightContentMeasured(it.width) }
-                .background(background)
                 .align(Alignment.CenterEnd),
             content = { contentUnderRight() }
         )
@@ -136,13 +131,13 @@ fun DraggableScaffold(
             content = { contentOnTop() },
             modifier = Modifier
                 .offset { IntOffset((state.offsetX).roundToInt(), 0) }
-                .background(MaterialTheme.colors.surface)
                 .onSizeChanged {
                     with(density) {
                         contentHeight = it.height.toDp()
+                        state.onContentMeasured(it.width.toFloat())
                     }
                 }
-                .pointerInput(_dragResistance) {
+                .pointerInput(_dragResistance, state) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dragAmount ->
                             state.onHandleDrag(dragAmount, _dragResistance)
@@ -159,9 +154,3 @@ fun DraggableScaffold(
     }
 }
 
-@JvmInline
-value class SnapOffset(
-    private val value: Float
-) {
-    val offset get() = value.coerceIn(0f, 1f)
-}

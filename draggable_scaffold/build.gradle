@@ -4,7 +4,7 @@ plugins {
     id 'maven-publish'
 }
 
-def compose_version = "1.0.2"
+def compose_version = "1.1.1"
 
 android {
     compileSdk 30
