@@ -6,7 +6,7 @@ DraggableScaffold is a library that helps stack one composable on top of another
 
 ## Demo
 
-To see the code for the examples in the gif you can check [here](https://github.com/Tgo1014/DraggableScaffold/blob/f1b7bd1a68e5c1b56f6cbf04afdd23cd9147fdcb/app/src/main/java/tgo1014/draggablescaffold/MainActivity.kt#L42).
+To see the code for the examples in the gif you can check [here](https://github.com/Tgo1014/DraggableScaffold/blob/e20c54ea365336cf62307b95d0b9ef011aef6a07/app/src/main/java/tgo1014/sample/MainActivity.kt#L62).
 
 ![](https://github.com/Tgo1014/DraggableScaffold/raw/main/sources/demo.gif)
 
