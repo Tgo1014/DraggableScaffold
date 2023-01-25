@@ -41,7 +41,7 @@ allprojects {
 ```gradle
 dependencies {
   ...
-  implementation "com.github.Tgo1014:DraggableScaffold:1.2.1"
+  implementation "com.github.Tgo1014:DraggableScaffold:1.3.0"
   ...
 }
 ```
